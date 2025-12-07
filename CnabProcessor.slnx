@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/docker/" />
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
     <File Path="README.md" />
