@@ -1,6 +1,6 @@
 using System;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public abstract class BaseEntity
 {
