@@ -1,3 +1,4 @@
+using Application.Features.GetStores.DTOs;
 using Application.Features.GetStores.Queries;
 using Domain.Enums;
 using Domain.Extensions;
