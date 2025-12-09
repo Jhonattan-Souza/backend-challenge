@@ -1,3 +1,4 @@
+using Application.Features.ProcessCnabFile.Commands;
 using FastEndpoints;
 
 namespace Api.Endpoints;
@@ -21,25 +22,25 @@ public class CnabFilesEndpoint(ILogger<CnabFilesEndpoint> logger) : Endpoint<Upl
     {
         if (req.File is not { Length: > 0 })
         {
-            logger.LogWarning("Nenhum arquivo recebido ou arquivo vazio");
+            logger.LogWarning("No file received or file is empty");
             await Send.NoContentAsync(ct);
             return;
         }
 
-        logger.LogInformation("Arquivo recebido: {FileName} ({Size} bytes)", req.File.FileName, req.File.Length);
+        logger.LogInformation("File received: {FileName} ({Size} bytes)", req.File.FileName, req.File.Length);
+        
         await using var stream = req.File.OpenReadStream();
         using var reader = new StreamReader(stream);
 
         var lineNumber = 0;
-        while (!reader.EndOfStream && !ct.IsCancellationRequested)
+        string? line;
+        while ((line = await reader.ReadLineAsync(ct)) is not null && !ct.IsCancellationRequested)
         {
-            var line = await reader.ReadLineAsync(ct);
             lineNumber++;
-            
-            logger.LogInformation("Linha {LineNumber}: {Content}", lineNumber, line);
+            await new ProcessCnabLineCommand(line, lineNumber).ExecuteAsync(ct);
         }
 
-        logger.LogInformation("Processamento concluído. Total de linhas: {TotalLines}", lineNumber);
+        logger.LogInformation("Processing completed. Total lines: {TotalLines}", lineNumber);
         
         await Send.NoContentAsync(ct);
     }

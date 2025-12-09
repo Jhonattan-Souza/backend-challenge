@@ -1,3 +1,4 @@
+using Application.Services;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Serilog;
@@ -17,6 +18,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+builder.Services.AddSingleton<ICnabParser, CnabParser>();
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument(o =>
 {
