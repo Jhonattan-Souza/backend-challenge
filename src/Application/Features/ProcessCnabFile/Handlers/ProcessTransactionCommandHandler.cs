@@ -1,5 +1,6 @@
 using Application.Features.ProcessCnabFile.Commands;
 using Domain.Entities;
+using Domain.Extensions;
 using Domain.Repositories;
 using FastEndpoints;
 using FluentResults;
@@ -17,6 +18,15 @@ public class ProcessTransactionCommandHandler(
 {
     public async Task<Result> ExecuteAsync(ProcessTransactionCommand command, CancellationToken ct)
     {
+        if (await transactionRepository.ExistsByHashAsync(command.LineHash, ct))
+        {
+            logger.LogWarning(
+                "Duplicate transaction detected - Line: {LineNumber} | Hash: {Hash}",
+                command.LineNumber,
+                command.LineHash);
+            return Result.Ok();
+        }
+
         logger.LogInformation(
             "Processing transaction - Line: {LineNumber} | Type: {Type} | Amount: {Amount:C} | Store: {StoreName} | Owner: {StoreOwnerName}",
             command.LineNumber,
@@ -56,12 +66,17 @@ public class ProcessTransactionCommandHandler(
             logger.LogDebug("Created new Store: {Name}", command.StoreName);
         }
         
+        var signedAmount = command.Type.IsExpense() 
+            ? -Math.Abs(command.Amount) 
+            : Math.Abs(command.Amount);
+
         var transactionResult = Transaction.Create(
             command.Type,
             command.Date,
-            command.Amount,
+            signedAmount,
             command.Cpf,
             command.CardNumber,
+            command.LineHash,
             store
         );
 
@@ -77,9 +92,10 @@ public class ProcessTransactionCommandHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation(
-            "Transaction persisted successfully - Id: {TransactionId} | Store: {StoreName}",
+            "Transaction persisted successfully - Id: {TransactionId} | Store: {StoreName} | Amount: {Amount:C}",
             transaction.Id,
-            command.StoreName
+            command.StoreName,
+            signedAmount
         );
 
         return Result.Ok();

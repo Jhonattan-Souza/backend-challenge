@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Domain.Enums;
 using Domain.Validators;
 using FluentResults;
@@ -13,6 +12,7 @@ public class Transaction : BaseEntity
     public decimal Amount { get; private set; }
     public string Cpf { get; private set; } = null!;
     public string CardNumber { get; private set; } = null!;
+    public string LineHash { get; private set; } = null!;
     
     public Guid StoreId { get; private set; }
     public virtual Store Store { get; private set; } = null!;
@@ -25,6 +25,7 @@ public class Transaction : BaseEntity
         decimal amount,
         string cpf,
         string cardNumber,
+        string lineHash,
         Store store)
     {
         Type = type;
@@ -32,6 +33,7 @@ public class Transaction : BaseEntity
         Amount = amount;
         Cpf = cpf;
         CardNumber = cardNumber;
+        LineHash = lineHash;
         Store = store;
         StoreId = store.Id;
     }
@@ -42,9 +44,10 @@ public class Transaction : BaseEntity
         decimal amount,
         string cpf,
         string cardNumber,
+        string lineHash,
         Store store)
     {
-        var transaction = new Transaction(type, date, amount, cpf, cardNumber, store);
+        var transaction = new Transaction(type, date, amount, cpf, cardNumber, lineHash, store);
         return Validate(transaction, new TransactionValidator());
     }
 }

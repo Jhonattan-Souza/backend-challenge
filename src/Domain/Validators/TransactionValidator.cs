@@ -17,7 +17,7 @@ public class TransactionValidator : AbstractValidator<Transaction>
             .LessThanOrEqualTo(DateTimeOffset.UtcNow.AddDays(1)).WithMessage("Transaction date cannot be in the future");
 
         RuleFor(x => x.Amount)
-            .GreaterThanOrEqualTo(0).WithMessage("Transaction amount must be greater than or equal to zero");
+            .NotEqual(0).WithMessage("Transaction amount cannot be zero");
 
         RuleFor(x => x.Cpf)
             .NotEmpty().WithMessage("CPF is required")
@@ -26,8 +26,8 @@ public class TransactionValidator : AbstractValidator<Transaction>
 
         RuleFor(x => x.CardNumber)
             .NotEmpty().WithMessage("Card number is required")
-            .Length(12).WithMessage("Card number must be 12 digits")
-            .Matches(@"^\d{12}$").WithMessage("Card number must contain only numbers");
+            .Length(12).WithMessage("Card number must be 12 characters")
+            .Matches(@"^[\d\*]{12}$").WithMessage("Card number must contain only numbers or asterisks");
 
         RuleFor(x => x.Store)
             .NotNull().WithMessage("Store is required");

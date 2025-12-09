@@ -25,6 +25,13 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 
         builder.Property(t => t.CreatedAt).IsRequired();
         builder.Property(t => t.UpdatedAt).IsRequired();
+
+        builder.Property(t => t.LineHash)
+            .HasMaxLength(64)
+            .IsRequired();
+        
+        builder.HasIndex(t => t.LineHash)
+            .IsUnique();
         
         builder.HasOne(t => t.Store)
             .WithMany(s => s.Transactions)

@@ -3,13 +3,12 @@ using FastEndpoints;
 
 namespace Api.Endpoints;
 
-public class CnabFilesEndpoint(ILogger<CnabFilesEndpoint> logger) : Endpoint<UploadFileRequest>
+public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<string>
 {
     public override void Configure()
     {
-        Post("api/v1/cnab-files");
+        Post("api/v1/cnab-text");
         
-        AllowFileUploads(); 
         AllowAnonymous();
         
         Throttle(
@@ -18,19 +17,18 @@ public class CnabFilesEndpoint(ILogger<CnabFilesEndpoint> logger) : Endpoint<Upl
         );
     }
 
-    public override async Task HandleAsync(UploadFileRequest req, CancellationToken ct)
+    public override async Task HandleAsync(string req, CancellationToken ct)
     {
-        if (req.File is not { Length: > 0 })
+        if (string.IsNullOrWhiteSpace(req))
         {
-            logger.LogWarning("No file received or file is empty");
+            logger.LogWarning("No content received or content is empty");
             await Send.NoContentAsync(ct);
             return;
         }
 
-        logger.LogInformation("File received: {FileName} ({Size} bytes)", req.File.FileName, req.File.Length);
+        logger.LogInformation("CNAB content received ({Size} characters)", req.Length);
         
-        await using var stream = req.File.OpenReadStream();
-        using var reader = new StreamReader(stream);
+        using var reader = new StringReader(req);
 
         var lineNumber = 0;
         while (await reader.ReadLineAsync(ct) is { } line && !ct.IsCancellationRequested)
@@ -44,10 +42,3 @@ public class CnabFilesEndpoint(ILogger<CnabFilesEndpoint> logger) : Endpoint<Upl
         await Send.NoContentAsync(ct);
     }
 }
-
-public class UploadFileRequest
-{
-    [Microsoft.AspNetCore.Mvc.FromForm]
-    public IFormFile File { get; set; } = null!;
-}
-

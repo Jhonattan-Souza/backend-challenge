@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Application.Features.ProcessCnabFile.Commands;
 using Application.Services;
 using FastEndpoints;
@@ -20,6 +22,7 @@ public class ProcessCnabLineCommandHandler(
 
         try
         {
+            var lineHash = ComputeHash(command.Line);
             var result = cnabParser.ParseLine(command.Line);
 
             var transactionCommand = new ProcessTransactionCommand(
@@ -30,6 +33,7 @@ public class ProcessCnabLineCommandHandler(
                 CardNumber: result.CardNumber,
                 StoreName: result.StoreName,
                 StoreOwnerName: result.StoreOwnerName,
+                LineHash: lineHash,
                 LineNumber: command.LineNumber
             );
 
@@ -39,5 +43,11 @@ public class ProcessCnabLineCommandHandler(
         {
             logger.LogError(ex, "Error processing line {LineNumber}: {Content}", command.LineNumber, command.Line);
         }
+    }
+
+    private static string ComputeHash(string line)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(line));
+        return Convert.ToHexString(bytes);
     }
 }

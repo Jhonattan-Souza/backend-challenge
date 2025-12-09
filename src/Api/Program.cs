@@ -3,6 +3,7 @@ using Domain.Repositories;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Infrastructure.Persistence;
+using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -27,9 +28,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Todo: configure inside the projects own package
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IStoreOwnerRepository, StoreOwnerRepository>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddSingleton<ICnabParser, CnabParser>();
 
 builder.Services.AddFastEndpoints();
+
 builder.Services.SwaggerDocument(o =>
 {
     o.DocumentSettings = s =>

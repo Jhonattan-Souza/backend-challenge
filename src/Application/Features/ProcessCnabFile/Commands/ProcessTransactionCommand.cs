@@ -12,6 +12,7 @@ public sealed record ProcessTransactionCommand(
     string CardNumber,
     string StoreName,
     string StoreOwnerName,
+    string LineHash,
     int LineNumber
 ) : ICommand<Result>;
 
