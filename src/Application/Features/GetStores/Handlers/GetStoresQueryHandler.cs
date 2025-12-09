@@ -27,9 +27,8 @@ public class GetStoresQueryHandler(IStoreRepository storeRepository)
                 t.Cpf,
                 t.CardNumber
             )).ToList();
-
-            var balance = store.Transactions.Sum(t => 
-                t.Type.IsExpense() ? -t.Amount : t.Amount);
+            
+            var balance = store.Transactions.Sum(t => t.Amount);
 
             return new StoreDto(
                 store.Id,

@@ -296,7 +296,6 @@ function renderTransactions(transactions) {
     return transactions.map(t => {
         const isIncome = t.sign === '+';
         const typeClass = isIncome ? 'income' : 'expense';
-        const amountPrefix = isIncome ? '+' : '-';
 
         return `
             <div class="transaction-item">
@@ -305,7 +304,7 @@ function renderTransactions(transactions) {
                     <span class="transaction-date">${formatDate(t.date)}</span>
                     <span class="transaction-meta">Card: ${escapeHtml(t.cardNumber)} | CPF: ${formatCpf(t.cpf)}</span>
                 </div>
-                <span class="transaction-amount ${typeClass}">${amountPrefix} ${formatCurrency(t.amount)}</span>
+                <span class="transaction-amount ${typeClass}">${t.sign} ${formatCurrency(Math.abs(t.amount))}</span>
             </div>
         `;
     }).join('');
