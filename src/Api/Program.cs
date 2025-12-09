@@ -5,6 +5,7 @@ using FastEndpoints.Swagger;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,17 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+// CORS for local development
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // TODO: change to sql server
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -51,6 +63,23 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+}
+
+app.UseCors();
+
+// Serve static files from Web folder
+var webPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Web");
+if (Directory.Exists(webPath))
+{
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = new PhysicalFileProvider(Path.GetFullPath(webPath))
+    });
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(Path.GetFullPath(webPath)),
+        RequestPath = ""
+    });
 }
 
 app.UseHttpsRedirection();

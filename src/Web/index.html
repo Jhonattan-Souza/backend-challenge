@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CNAB File Processor - Upload and analyze financial transaction files">
+    <title>CNAB Processor | Financial Transaction Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                    </div>
+                    <h1>CNAB Processor</h1>
+                </div>
+                <p class="tagline">Financial Transaction Management</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="section-header">
+                    <h2>Upload CNAB File</h2>
+                    <p>Drag & drop or click to select your transaction file</p>
+                </div>
+
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </div>
+                    <p class="upload-text">Drop your CNAB file here</p>
+                    <span class="upload-subtext">or click to browse</span>
+                    <input type="file" id="fileInput" accept=".txt,.cnab" hidden>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-container" id="progressContainer" hidden>
+                    <div class="progress-info">
+                        <span class="progress-label">Uploading...</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-status" id="progressStatus">Preparing file...</p>
+                </div>
+
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage" hidden>
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </div>
+                    <span>File processed successfully!</span>
+                </div>
+            </section>
+
+            <!-- Stores Section -->
+            <section class="stores-section" id="storesSection">
+                <div class="section-header">
+                    <h2>Stores & Transactions</h2>
+                    <button class="refresh-btn" id="refreshBtn" title="Refresh data">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="search-group">
+                        <input type="text" id="cpfInput" class="cpf-input"
+                            placeholder="Filter by CPF (e.g. 12345678901)" maxlength="14">
+                        <button class="search-btn" id="searchBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            Search
+                        </button>
+                        <button class="clear-btn" id="clearBtn" title="Clear filter">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="page-size-group">
+                        <label for="pageSizeSelect">Items per page:</label>
+                        <select id="pageSizeSelect" class="page-size-select">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState" hidden>
+                    <div class="spinner"></div>
+                    <p>Loading stores...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" hidden>
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                    </div>
+                    <p>No stores found</p>
+                    <span>Upload a CNAB file or adjust your search filter</span>
+                </div>
+
+                <!-- Stores List -->
+                <div class="stores-list" id="storesList"></div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" hidden>
+                    <button class="pagination-btn" id="prevBtn" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        Previous
+                    </button>
+                    <div class="pagination-info">
+                        <span id="pageInfo">Page 1 of 1</span>
+                        <span id="totalInfo" class="total-info">(0 stores)</span>
+                    </div>
+                    <button class="pagination-btn" id="nextBtn" disabled>
+                        Next
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 CNAB Processor. Built with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
