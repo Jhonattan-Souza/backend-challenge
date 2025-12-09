@@ -1,5 +1,6 @@
 using Domain.Enums;
 using FastEndpoints;
+using FluentResults;
 
 namespace Application.Features.ProcessCnabFile.Commands;
 
@@ -12,4 +13,5 @@ public sealed record ProcessTransactionCommand(
     string StoreName,
     string StoreOwnerName,
     int LineNumber
-) : ICommand;
+) : ICommand<Result>;
+

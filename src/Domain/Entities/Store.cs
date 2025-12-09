@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Domain.Validators;
+using FluentResults;
 
 namespace Domain.Entities;
 
@@ -13,13 +15,16 @@ public class Store : BaseEntity
 
     private Store() { }
 
-    public static Store Create(string name, StoreOwner owner)
+    public Store(string name, StoreOwner owner)
     {
-        return new Store
-        {
-            Name = name,
-            Owner = owner,
-            OwnerId = owner.Id
-        };
+        Name = name;
+        Owner = owner;
+        OwnerId = owner.Id;
+    }
+
+    public static Result<Store> Create(string name, StoreOwner owner)
+    {
+        var store = new Store(name, owner);
+        return Validate(store, new StoreValidator());
     }
 }

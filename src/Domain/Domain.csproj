@@ -6,4 +6,9 @@
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.8.1" />
+        <PackageReference Include="FluentResults" Version="4.0.0" />
+    </ItemGroup>
+
 </Project>

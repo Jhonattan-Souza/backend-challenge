@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
 using Domain.Enums;
+using Domain.Validators;
+using FluentResults;
 
 namespace Domain.Entities;
 
@@ -16,7 +19,7 @@ public class Transaction : BaseEntity
 
     private Transaction() { }
 
-    public static Transaction Create(
+    public Transaction(
         TransactionType type,
         DateTimeOffset date,
         decimal amount,
@@ -24,15 +27,24 @@ public class Transaction : BaseEntity
         string cardNumber,
         Store store)
     {
-        return new Transaction
-        {
-            Type = type,
-            Date = date,
-            Amount = amount,
-            Cpf = cpf,
-            CardNumber = cardNumber,
-            Store = store,
-            StoreId = store.Id
-        };
+        Type = type;
+        Date = date;
+        Amount = amount;
+        Cpf = cpf;
+        CardNumber = cardNumber;
+        Store = store;
+        StoreId = store.Id;
+    }
+
+    public static Result<Transaction> Create(
+        TransactionType type,
+        DateTimeOffset date,
+        decimal amount,
+        string cpf,
+        string cardNumber,
+        Store store)
+    {
+        var transaction = new Transaction(type, date, amount, cpf, cardNumber, store);
+        return Validate(transaction, new TransactionValidator());
     }
 }
