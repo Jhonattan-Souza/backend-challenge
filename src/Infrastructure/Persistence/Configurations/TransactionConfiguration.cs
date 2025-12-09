@@ -26,6 +26,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.CreatedAt).IsRequired();
         builder.Property(t => t.UpdatedAt).IsRequired();
         
-        builder.HasOne(t => t.Store).WithMany(s => s.Transactions);
+        builder.HasOne(t => t.Store)
+            .WithMany(s => s.Transactions)
+            .HasForeignKey(t => t.StoreId);
     }
 }

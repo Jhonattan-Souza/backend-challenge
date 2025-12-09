@@ -19,6 +19,11 @@ public class StoreConfiguration : IEntityTypeConfiguration<Store>
         builder.Property(o => o.UpdatedAt).IsRequired();
 
         builder.HasOne(x => x.Owner)
-            .WithMany(o => o.Stores);
+            .WithMany(o => o.Stores)
+            .HasForeignKey(s => s.OwnerId);
+        
+        builder.HasIndex(o => o.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_StoreName");
     }
 }
