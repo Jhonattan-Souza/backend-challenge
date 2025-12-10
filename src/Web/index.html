@@ -171,6 +171,10 @@
         </footer>
     </div>
 
+    <script>
+        // Generate unique client ID for rate limiting per page load
+        window.CLIENT_ID = crypto.randomUUID();
+    </script>
     <script src="script.js"></script>
 </body>
 

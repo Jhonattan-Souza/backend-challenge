@@ -4,6 +4,8 @@ const ENDPOINTS = {
     upload: `${API_BASE_URL}/api/v1/cnab-files`,
     stores: `${API_BASE_URL}/api/v1/stores`
 };
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 // ===== State =====
 const state = {
@@ -91,6 +93,11 @@ function handleFileUpload(file) {
         return;
     }
 
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+        alert(`File size (${formatBytes(file.size)}) exceeds the maximum allowed size of ${MAX_FILE_SIZE_MB}MB`);
+        return;
+    }
+
     successMessage.hidden = true;
     progressContainer.hidden = false;
     progressFill.style.width = '0%';
@@ -124,6 +131,7 @@ function handleFileUpload(file) {
 
     xhr.addEventListener('load', () => {
         uploadZone.style.pointerEvents = 'auto';
+        progressFill.classList.remove('indeterminate');
         if (xhr.status >= 200 && xhr.status < 300) {
             progressContainer.hidden = true;
             successMessage.hidden = false;
@@ -131,6 +139,9 @@ function handleFileUpload(file) {
                 state.page = 1;
                 loadStores();
             }, 1000);
+        } else if (xhr.status === 413) {
+            progressStatus.textContent = `Error: File too large. Maximum allowed is ${MAX_FILE_SIZE_MB}MB`;
+            progressFill.style.background = 'var(--danger)';
         } else {
             progressStatus.textContent = `Error: ${xhr.statusText || 'Upload failed'}`;
             progressFill.style.background = 'var(--danger)';
@@ -144,6 +155,7 @@ function handleFileUpload(file) {
     });
 
     xhr.open('POST', ENDPOINTS.upload);
+    xhr.setRequestHeader('X-Client-Id', window.CLIENT_ID);
     xhr.send(formData);
 }
 

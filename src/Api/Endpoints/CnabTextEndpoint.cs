@@ -13,7 +13,8 @@ public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<strin
         
         Throttle(
             hitLimit: 1,
-            durationSeconds: 5
+            durationSeconds: 5,
+            headerName: "X-Client-Id"
         );
     }
 
