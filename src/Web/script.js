@@ -42,6 +42,10 @@ const elements = {
 
 // ===== Initialization =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure success message is hidden on page load
+    elements.successMessage.hidden = true;
+    elements.progressContainer.hidden = true;
+
     initializeUploadZone();
     initializeRefreshButton();
     initializeFilters();
@@ -102,12 +106,20 @@ function handleFileUpload(file) {
     xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
             const percent = Math.round((e.loaded / e.total) * 100);
-            progressFill.style.width = `${percent}%`;
-            progressPercentage.textContent = `${percent}%`;
-            progressStatus.textContent = percent < 100
-                ? `Uploading ${formatBytes(e.loaded)} of ${formatBytes(e.total)}...`
-                : 'Processing transactions...';
+            if (percent < 100) {
+                progressFill.style.width = `${percent}%`;
+                progressPercentage.textContent = `${percent}%`;
+                progressStatus.textContent = `Uploading ${formatBytes(e.loaded)} of ${formatBytes(e.total)}...`;
+            }
         }
+    });
+
+    xhr.upload.addEventListener('loadend', () => {
+        // Upload finished, now processing on server
+        progressFill.style.width = '100%';
+        progressFill.classList.add('indeterminate');
+        progressPercentage.textContent = '';
+        progressStatus.textContent = 'Processing file on server...';
     });
 
     xhr.addEventListener('load', () => {
@@ -293,7 +305,12 @@ function renderTransactions(transactions) {
         return '<p style="padding: 1rem; color: var(--text-muted);">No transactions</p>';
     }
 
-    return transactions.map(t => {
+    // Sort transactions by date descending (newest first)
+    const sortedTransactions = [...transactions].sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    return sortedTransactions.map(t => {
         const isIncome = t.sign === '+';
         const typeClass = isIncome ? 'income' : 'expense';
 

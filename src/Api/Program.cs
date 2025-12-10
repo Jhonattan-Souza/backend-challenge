@@ -1,11 +1,8 @@
-using Application.Services;
-using Domain.Repositories;
+using Api.Configurations;
+using Application;
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using Infrastructure.Persistence;
-using Infrastructure.Persistence.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
+using Infrastructure;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,28 +20,30 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// CORS for local development
 builder.Services.AddCors(options =>
 {
+    var frontendUrl = builder.Configuration["FrontendUrl"] ?? "*";
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (frontendUrl == "*")
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins(frontendUrl)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
     });
 });
 
-// TODO: change to sql server
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=cnab.db"));
-
-// Todo: configure inside the projects own package
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IStoreOwnerRepository, StoreOwnerRepository>();
-builder.Services.AddScoped<IStoreRepository, StoreRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddSingleton<ICnabParser, CnabParser>();
-
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHealthCheckServices();
 builder.Services.AddFastEndpoints();
 
 builder.Services.SwaggerDocument(o =>
@@ -58,30 +57,8 @@ builder.Services.SwaggerDocument(o =>
 
 var app = builder.Build();
 
-// TODO: remove when using sql server
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-}
-
 app.UseCors();
-
-// Serve static files from Web folder
-var webPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Web");
-if (Directory.Exists(webPath))
-{
-    app.UseDefaultFiles(new DefaultFilesOptions
-    {
-        FileProvider = new PhysicalFileProvider(Path.GetFullPath(webPath))
-    });
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(Path.GetFullPath(webPath)),
-        RequestPath = ""
-    });
-}
-
+app.UseHealthCheckEndpoints();
 app.UseHttpsRedirection();
 app.UseFastEndpoints().UseSwaggerGen();
 app.UseSerilogRequestLogging();

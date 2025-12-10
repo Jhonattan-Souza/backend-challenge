@@ -1,5 +1,10 @@
 <Solution>
-  <Folder Name="/docker/" />
+  <Folder Name="/docker/">
+    <File Path="docker-compose.yml" />
+    <File Path="docker\nginx.conf" />
+    <File Path="docker\sql\01_create_database.sql" />
+    <File Path="src\Api\Dockerfile" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
     <File Path="README.md" />
