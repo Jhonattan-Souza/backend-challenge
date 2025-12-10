@@ -34,7 +34,6 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddSqlClientInstrumentation(options =>
             {
-                options.SetDbStatementForText = true;
                 options.RecordException = true;
             });
         

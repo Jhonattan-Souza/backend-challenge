@@ -3,7 +3,7 @@ using FastEndpoints;
 
 namespace Api.Endpoints;
 
-public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<string>
+public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<ProcessCnabTextRequest>
 {
     public override void Configure()
     {
@@ -19,7 +19,7 @@ public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<strin
         
         Description(b => b
             .WithTags("CNAB Processing")
-            .Accepts<string>("text/plain")
+            .Accepts<ProcessCnabTextRequest>("text/plain")
             .Produces(204)
             .Produces(429));
         
@@ -32,18 +32,18 @@ public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<strin
         });
     }
 
-    public override async Task HandleAsync(string req, CancellationToken ct)
+    public override async Task HandleAsync(ProcessCnabTextRequest req, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(req))
+        if (string.IsNullOrWhiteSpace(req.Content))
         {
             logger.LogWarning("No content received or content is empty");
             await Send.NoContentAsync(ct);
             return;
         }
 
-        logger.LogInformation("CNAB content received ({Size} characters)", req.Length);
+        logger.LogInformation("CNAB content received ({Size} characters)", req.Content.Length);
         
-        using var reader = new StringReader(req);
+        using var reader = new StringReader(req.Content);
 
         var lineNumber = 0;
         while (await reader.ReadLineAsync(ct) is { } line && !ct.IsCancellationRequested)
@@ -56,4 +56,9 @@ public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<strin
         
         await Send.NoContentAsync(ct);
     }
+}
+
+public class ProcessCnabTextRequest : IPlainTextRequest
+{
+    public string Content { get; set; } = string.Empty;
 }
