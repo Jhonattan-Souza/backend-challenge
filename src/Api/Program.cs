@@ -1,4 +1,5 @@
 using Api.Configurations;
+using Api.Middleware;
 using Application;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -84,6 +85,7 @@ builder.Services.SwaggerDocument(o =>
 
 var app = builder.Build();
 
+app.UseExceptionHandling();
 app.UseCors();
 app.UseHealthCheckEndpoints();
 app.UseHttpsRedirection();

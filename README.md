@@ -82,3 +82,16 @@ dotnet build src/Api
 | `/health` | Full health status with DB check |
 | `/health/live` | Liveness probe |
 | `/health/ready` | Readiness probe |
+
+## Architecture Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Clean Architecture** | Separates Domain, Application, Infrastructure and API layers for testability and maintainability |
+| **Repository + Unit of Work** | Abstracts data access, enables unit testing with mocks, coordinates transactions |
+| **Result Pattern (FluentResults)** | Explicit error handling without exceptions, cleaner control flow |
+| **FluentValidation in Domain** | Business rules enforced at entity creation, fail-fast validation |
+| **FastEndpoints** | Minimal API alternative with built-in validation, throttling, and Swagger support |
+| **CQRS-lite (Commands/Queries)** | Separates read/write operations, vertical slice organization per feature |
+| **Testcontainers for E2E** | Real SQL Server in tests, no mocking infrastructure |
+| **LineHash for idempotency** | SHA256 hash prevents duplicate transaction processing on re-upload |
