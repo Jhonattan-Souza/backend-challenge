@@ -16,6 +16,20 @@ public class CnabTextEndpoint(ILogger<CnabTextEndpoint> logger) : Endpoint<strin
             durationSeconds: 5,
             headerName: "X-Client-Id"
         );
+        
+        Description(b => b
+            .WithTags("CNAB Processing")
+            .Accepts<string>("text/plain")
+            .Produces(204)
+            .Produces(429));
+        
+        Summary(s =>
+        {
+            s.Summary = "Process CNAB text content";
+            s.Description = "Processes CNAB transaction data provided as plain text. Each line is parsed and saved to the database. Rate limited to 1 request per 5 seconds per client.";
+            s.Responses[204] = "CNAB content processed successfully";
+            s.Responses[429] = "Too many requests - rate limit exceeded";
+        });
     }
 
     public override async Task HandleAsync(string req, CancellationToken ct)

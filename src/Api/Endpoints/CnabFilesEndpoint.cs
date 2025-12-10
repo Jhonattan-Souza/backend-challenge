@@ -21,6 +21,22 @@ public class CnabFilesEndpoint(
             durationSeconds: 5,
             headerName: "X-Client-Id"
         );
+        
+        Description(b => b
+            .WithTags("CNAB Processing")
+            .Accepts<UploadFileRequest>("multipart/form-data")
+            .Produces(204)
+            .Produces(413)
+            .Produces(429));
+        
+        Summary(s =>
+        {
+            s.Summary = "Upload and process CNAB file";
+            s.Description = "Uploads a CNAB file (.txt or .cnab), parses each line, and saves transactions to the database. Maximum file size: 5MB. Rate limited to 1 request per 5 seconds per client.";
+            s.Responses[204] = "File processed successfully";
+            s.Responses[413] = "File size exceeds the maximum allowed size";
+            s.Responses[429] = "Too many requests - rate limit exceeded";
+        });
     }
 
     public override async Task HandleAsync(UploadFileRequest req, CancellationToken ct)
@@ -66,8 +82,10 @@ public class CnabFilesEndpoint(
     }
 }
 
+/// <summary>Request model for CNAB file upload</summary>
 public class UploadFileRequest
 {
+    /// <summary>CNAB file to upload (.txt or .cnab format)</summary>
     [Microsoft.AspNetCore.Mvc.FromForm]
     public IFormFile File { get; set; } = null!;
 }

@@ -3,6 +3,8 @@ using Application;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Infrastructure;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,32 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+var serviceName = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "cnab-processor-api";
+var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSqlClientInstrumentation(options =>
+            {
+                options.SetDbStatementForText = true;
+                options.RecordException = true;
+            });
+        
+        if (!string.IsNullOrEmpty(otlpEndpoint))
+        {
+            tracing.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(otlpEndpoint);
+                options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+            });
+        }
+    });
 
 builder.Services.AddCors(options =>
 {

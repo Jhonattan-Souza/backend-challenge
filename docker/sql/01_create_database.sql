@@ -57,6 +57,8 @@ BEGIN
     );
     
     CREATE UNIQUE INDEX IX_Transactions_LineHash ON Transactions(LineHash);
+    CREATE INDEX IX_Transactions_Cpf ON Transactions(Cpf);
+    CREATE INDEX IX_Transactions_StoreId ON Transactions(StoreId);
 END
 GO
 
